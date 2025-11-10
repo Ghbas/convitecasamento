@@ -1,0 +1,341 @@
+ <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmação de Presença | Casamento Guilherme e Jaqueline</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Fontes -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Pinyon+Script&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-color: #6d28d9;
+      --accent-color: #f472b6;
+      --title-color: #546b57;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f5f5f5;
+      min-height: 100vh;
+    }
+    .wedding-title {
+      font-family: 'Pinyon Script', cursive;
+      color: var(--title-color);
+    }
+    .form-container {
+      box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1),
+                  0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .btn-confirm {
+      background-color: var(--accent-color);
+      transition: all 0.2s;
+    }
+    .btn-confirm:hover {
+      background-color: #ec4899;
+      transform: translateY(-1px);
+    }
+    .btn-deny {
+      border: 1px solid var(--primary-color);
+      color: var(--primary-color);
+      transition: all 0.2s;
+    }
+    .btn-deny:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+  </style>
+</head>
+
+<body class="flex items-center justify-center p-4">
+  <div class="w-full max-w-xl">
+    
+    <header class="text-center mb-8">
+      <h1 class="text-5xl sm:text-6xl wedding-title">Guilherme & Jaqueline</h1>
+      <p class="text-lg mt-2 text-gray-700 font-semibold">Confirmação de Presença</p>
+      <p class="text-sm mt-1 text-gray-500">Por favor, digite seu nome exatamente como está no convite.</p>
+    </header>
+
+    <div id="rsvp-card" class="bg-white p-6 sm:p-10 rounded-xl form-container">
+
+      <!-- Instruções -->
+      <div id="setup-instructions" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 mb-6 rounded-lg">
+        <p class="font-bold mb-2">🚨 INSTRUÇÕES CRÍTICAS DE CONFIGURAÇÃO 🚨</p>
+        <p class="text-sm mb-2">
+        </p>
+        <ul class="list-disc list-inside text-sm ml-4">
+        </ul>
+        <p class="text-xs mt-2 text-red-600 font-semibold">O envio só será feito se o nome digitado for um convidado principal válido.</p>
+      </div>
+
+      <form id="rsvpForm" method="POST" target="_blank">
+        <!-- Configuração Google Forms -->
+        <input type="hidden" id="formActionUrl" value="https://docs.google.com/forms/d/1QEkeUE1MBsIlOJIeIF6i_tY-P6klu-JNwBfvZJuFT_0/formResponse">
+        <input type="hidden" id="entryIdNome" value="entry.1498135098">
+        <input type="hidden" id="entryIdStatus" value="entry.877086558">
+        <input type="hidden" id="entryIdListaPresenca" value="entry.1424661284">
+
+        <!-- Campo Nome -->
+        <div class="mb-4">
+          <label for="nome" class="block text-gray-700 font-medium mb-2">Seu Nome (Convidado Principal):</label>
+          <input type="text" id="nome" required
+                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-300"
+                 placeholder="Ex: Maria Aparecida">
+          <p id="nameError" class="text-xs text-red-500 mt-1 hidden">Nome não encontrado ou não é convidado principal.</p>
+        </div>
+
+        <!-- Acompanhantes -->
+        <div id="companionSelection" class="mt-6 mb-8 p-4 border rounded-lg border-gray-200 hidden">
+          <h3 class="text-gray-700 font-bold mb-3 border-b pb-2">Acompanhantes Permitidos</h3>
+          <p class="text-sm text-gray-600 mb-4">Marque as pessoas que também confirmarão presença com você.</p>
+          <div id="companionCheckboxes" class="space-y-2"></div>
+        </div>
+
+        <!-- Botões -->
+        <div class="space-y-4 sm:space-y-0 sm:flex sm:space-x-4">
+          <button type="button" id="btnConfirmar" class="btn-confirm w-full sm:flex-1 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl uppercase text-sm tracking-wider">
+            Confirmar Presença
+          </button>
+          <button type="button" id="btnRecusar" class="btn-deny w-full sm:flex-1 font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg uppercase text-sm tracking-wider">
+            Não poderei comparecer
+          </button>
+        </div>
+
+        <!-- Modal -->
+        <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+          <div class="bg-white p-6 rounded-lg max-w-sm w-full text-center">
+            <p id="modalMessage" class="text-lg font-medium text-gray-800 mb-4"></p>
+            <p id="modalSubMessage" class="text-sm text-gray-600 mb-4"></p>
+            <button type="button" id="btnCloseModal" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition">Entendi</button>
+          </div>
+        </div>
+
+      </form>
+
+      <p id="warningMessage" class="text-center text-xs text-red-500 mt-6 hidden">
+        ⚠️ Aviso: Ao confirmar, uma nova aba será aberta para registrar sua resposta final no Google Forms.
+      </p>
+    </div>
+
+    <footer class="text-center mt-6 text-gray-500 text-sm">
+      <p>&copy; 2025| RSVP Powered by Google Forms.</p>
+    </footer>
+  </div>
+
+  <script>
+    const GUEST_MAP = {
+    "Deivson Amorim": ["Elizangela Amorim", "Manu"],
+    "Isaías Batista": ["Raimunda", "Lúcia"],
+    "Tony Batista": ["Carla", "Gustavo"],
+    "Christian Campos": ["Jéssica"],
+    "Thyago Marques": [],
+    "Diana Marques": ["Matheus"],
+    "Isabel marques": [],
+    "Sérgio Batista": ["Rose"],
+    "Mônica Batista": [],
+    "Josias Santana": ["Arlete"],
+    "André Correia": ["Nataly"],
+    "José Roberto": ["Monia", "João Gabriel", "Tivinha"],
+    "Cleidinha": ["Jeferson"],
+    "Cristiano Amorim": ["Gerlane"],
+    "Adalto Santos": ["Manu"],
+    "Maria José": ["Mariana", "Queninha"],
+    "Jony Carvalho": ["Leo", "Jamilly", "Jonata"],
+    "Betânia Silva": ["Rodrigo"],
+    "Ramos": ["Fátima"],
+    "Davi Guimarães": ["Emily"],
+    "Simone Baptista": ["Junior", "Malcon", "Layze"],
+    "Marly": ["Israel"],
+    "Jonathan": ["Irmã jô"],
+    "Jader Ulisses": ["Ceça"],
+    "Cassia Maria": ["Adriano"],
+    "Tenório": ["Agna"],
+    "Rogério": ["Cláudia"],
+    "Rafael": ["Jéssica"],
+    "Cristiane": ["Junior"],
+    "Irmão João": [],
+    "André Brasil": ["Adriana"],
+    "Luciene Vidal": [],
+    "Edvilma Vanzoff": [],
+    "Israel Veloso": ["Gracinha"],
+    "Hector Veloso": ["Esposa"],
+    "Victor Veloso": ["Esposa"],
+    "Dani": ["Kleber"],
+    "Loide": [],
+    "Dona carminha": [],
+    "Will lan house": ["Leninha"],
+    "Aurélio Duarte": ["Sulani"],
+    "Heros Andrade": ["Clara"],
+    "Julia Dias": ["Arthur"],
+    "Ademir Junior": ["Esposa"],
+    "Mikelly Chagas": [],
+    "Marcílio": [],
+    "Otávio Gabriel": [],
+    "Luciano Albuquerque": ["Solange"],
+    "Nayara Batista": ["Bia", "Júlia"],
+    "Eloise": ["André felipe"],
+    "Jhullyanne Albertim": [],
+    "Fernanda": [],
+    "Maysa Gabrielly": [],
+    "Everson Saúba": ["Marcela", "Junior Sauba"],
+    "Fabíola Maria": ["Junior"],
+    "Aninha": [],
+    "Dhayanne": [],
+    "Marta": ["Marcos", "Liinha", "Mário"],
+    "Márcio": ["Rosa", "Amanda", "Jeferson", "Beatriz", "Abimael"],
+    "Marcilene": ["Manoel"],
+    "Marcondes": ["Elza"],
+    "Michelle": ["Nadilson"],
+    "Marcondes Junior": ["Nadja", "Nataly"],
+    "Marcelo": ["Edilene", "Murillo", "Bruno", "Laura"],
+    "Deivson": ["Elza"],
+    "Luiz Dantas": ["Eric"],
+    "Luciana": ["Mizael"],
+    "Ivonete": ["Isabelle", "Isabel", "Walter", "Ezequiel"],
+    "Jeconias": ["Natália", "Isaac"],
+    "Aquila": ["Dayna"],
+    "Josanides": ["Sandro"],
+    "Thayane": ["Thiago", "Arthur"],
+    "Thamires": ["Roger"],
+    "Josetania": ["Davi", "Victorya", "Diego", "Natália"],
+    "Talmon Filho": ["Mirella", "Tadeu"],
+    "Josanias": ["Juliana", "Felipe", "Josanias júnior"],
+    "Rebecca": ["Darlisson"],
+    "Josilene": ["Luiz Carlos", "Laiz", "Matheus"],
+    "Luiz Júnior": ["Talita"],
+    "Rosilene": [],
+    "Jaqueline": ["Sandro"],
+    "Francicleide": [],
+    "Luciana Karoline": ["Armando", "Irene"],
+    "Maria": ["Lindinez", "Maria Luiza"],
+    "Eginivaldo": ["Lucidalva"],
+    "Demetrius": ["Elienayde"],
+    "Morgana": ["André"],
+    "Abelardo": ["Ludmila"],
+    "Moniky": ["José Roberto"],
+    "Rebeca Barbosa": ["Douglas", "Lara", "João"],
+    "Natália": ["Oziel", "Nataly", "Sarah"],
+    "Maysa": ["Ceinha", "Francinaldo", "Vitória", "Abraão"]
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('rsvpForm');
+      const nomeInput = document.getElementById('nome');
+      const nameError = document.getElementById('nameError');
+      const companionSelection = document.getElementById('companionSelection');
+      const companionCheckboxes = document.getElementById('companionCheckboxes');
+      const modal = document.getElementById('feedbackModal');
+      const modalMessage = document.getElementById('modalMessage');
+      const modalSubMessage = document.getElementById('modalSubMessage');
+      const btnCloseModal = document.getElementById('btnCloseModal');
+
+      const normalize = n => n.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const getExactName = n => Object.keys(GUEST_MAP).find(k => normalize(k) === normalize(n));
+
+      const showModal = (title, text, isError = false) => {
+        modalMessage.textContent = title;
+        modalSubMessage.textContent = text;
+        modalMessage.classList.toggle('text-red-600', isError);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      };
+
+      const closeModal = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      };
+
+      btnCloseModal.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+      const updateUIForName = () => {
+        const name = nomeInput.value.trim();
+        nameError.classList.add('hidden');
+        companionSelection.classList.add('hidden');
+        companionCheckboxes.innerHTML = '';
+
+        if (name.length < 3) return;
+
+        const exact = getExactName(name);
+        if (!exact) {
+          nomeInput.classList.add('border-red-500', 'focus:ring-red-300');
+          nameError.classList.remove('hidden');
+          return;
+        }
+
+        nomeInput.classList.remove('border-red-500', 'focus:ring-red-300');
+        const companions = GUEST_MAP[exact] || [];
+        companionSelection.classList.remove('hidden');
+        if (companions.length === 0) {
+          companionCheckboxes.innerHTML = '<p class="text-sm text-gray-500">Sem acompanhantes.</p>';
+        } else {
+          companions.forEach(c => {
+            companionCheckboxes.insertAdjacentHTML('beforeend', `
+              <label class="flex items-center p-3 border rounded-lg cursor-pointer">
+                <input type="checkbox" name="companion" value="${c}" checked class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                <span class="ml-3 text-gray-700">${c}</span>
+              </label>
+            `);
+          });
+        }
+      };
+
+      nomeInput.addEventListener('input', updateUIForName);
+
+      const handleSubmit = (status) => {
+        const nome = nomeInput.value.trim();
+        const exact = getExactName(nome);
+        if (!exact) {
+          nameError.classList.remove('hidden');
+          showModal('Erro de Validação', 'Seu nome não é um convidado principal válido.', true);
+          return;
+        }
+
+        const action = document.getElementById('formActionUrl').value;
+        const entryNome = document.getElementById('entryIdNome').value;
+        const entryStatus = document.getElementById('entryIdStatus').value;
+        const entryLista = document.getElementById('entryIdListaPresenca').value;
+        form.querySelectorAll('input[data-temp]').forEach(e => e.remove());
+
+        const statusTxt = (status === 'confirmar') ? 'Sim, confirmo minha presença' : 'Não poderei comparecer';
+        const nomes = [exact];
+        if (status === 'confirmar') {
+          form.querySelectorAll('input[name="companion"]:checked').forEach(chk => nomes.push(chk.value));
+        }
+
+        const addHidden = (n, v) => {
+          const i = document.createElement('input');
+          i.type = 'hidden'; i.name = n; i.value = v; i.dataset.temp = "true";
+          form.appendChild(i);
+        };
+        addHidden(entryNome, exact);
+        addHidden(entryStatus, statusTxt);
+        addHidden(entryLista, nomes.join(', '));
+
+        form.action = action;
+        form.submit();
+        nomeInput.value = '';
+        companionSelection.classList.add('hidden');
+        companionCheckboxes.innerHTML = '';
+        showModal('Confirmação Enviada', `Obrigado, ${exact}! Sua resposta foi registrada.`);
+      };
+
+      document.getElementById('btnConfirmar').addEventListener('click', () => handleSubmit('confirmar'));
+      document.getElementById('btnRecusar').addEventListener('click', () => handleSubmit('recusar'));
+
+      document.getElementById('warningMessage').classList.remove('hidden');
+      const setup = document.getElementById('setup-instructions');
+      if (document.getElementById('formActionUrl').value && 
+          !document.getElementById('formActionUrl').value.includes('SUA_URL_DE_ENVIO_AQUI')) {
+        setup.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
